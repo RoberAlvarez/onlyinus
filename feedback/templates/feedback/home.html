@@ -156,9 +156,6 @@
         <!-- Story List -->
         {% for post in posts %}
         <div class="story-card bg-white p-4 mb-4">
-            <h3 class="story-title mb-2">
-                <a href="{% url 'view_post' post.id %}" class="text-decoration-none text-dark">{{ post.title }}</a>
-            </h3>
 
             <a href="{% url 'view_post' post.id %}" class="text-decoration-none text-dark">
                 <h3 class="story-title mb-2">{{ post.title }}</h3>
