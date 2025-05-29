@@ -163,12 +163,14 @@
             </a>
             <div class="d-flex justify-content-between align-items-center story-meta">
                 <span>{{ post.created_at|date:"j M Y" }}</span>
-                <form action="{% url 'upvote' post.id %}" method="post" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="vote-btn" title="Upvote">
-                        ▲ <span>{{ post.votes }}</span>
+                    <button
+                        class="vote-btn"
+                        title="Upvote"
+                        data-post-id="{{ post.id }}"
+                        id="vote-btn-{{ post.id }}"
+                    >
+                        ▲ <span id="vote-count-{{ post.id }}">{{ post.votes }}</span>
                     </button>
-                </form>
             </div>
         </div>
         {% empty %}
@@ -179,5 +181,35 @@
     </main>
     <!-- Bootstrap JS (optional, for interactive features) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.vote-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var postId = this.dataset.postId;
+            var btnRef = this;
+            // Prevent multiple votes
+            if (btnRef.classList.contains('voted')) return;
+
+            fetch('{% url "upvote" 0 %}'.replace('0', postId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    document.getElementById('vote-count-' + postId).innerText = data.votes;
+                    btnRef.classList.add('voted');
+                    btnRef.setAttribute('disabled', true);
+                }
+            });
+        });
+    });
+});
+</script>
+
 </body>
 </html>

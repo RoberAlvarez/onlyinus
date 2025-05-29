@@ -2,6 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
+from django.http import JsonResponse
+
+
+def custom_page_not_found(request, exception):
+    return redirect('home')  # Use the name of your home URL
 
 def home(request):
     sort = request.GET.get('sort', 'new')
@@ -28,14 +33,16 @@ def submit_post(request):
 
 def upvote_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    cookie_name = f'voted_post_{post_id}'
-    if request.COOKIES.get(cookie_name):
-        return redirect('home')
-    post.votes += 1
-    post.save()
-    response = redirect('home')
-    response.set_cookie(cookie_name, "1", max_age=60*60*24*365*2)
-    return response
+    voted = request.session.get(f'voted_{post_id}', False)
+    if not voted and request.method == 'POST':
+        post.votes += 1
+        post.save()
+        request.session[f'voted_{post_id}'] = True
+        # If AJAX request, return JSON
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'votes': post.votes, 'status': 'ok'})
+    # Fallback (non-AJAX): redirect or render
+    return redirect('home')
 
 
 def view_post(request, post_id):
