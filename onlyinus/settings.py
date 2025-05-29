@@ -15,6 +15,9 @@ SECRET_KEY = env("SECRET_KEY", default="secret-default-key")
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP requests to HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 #DEBUG = True
 ALLOWED_HOSTS = ['.herokuapp.com', 'localhost', '127.0.0.1', 'onlyinus.com',
                  'onlyinunitedstates.com',
